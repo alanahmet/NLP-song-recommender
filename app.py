@@ -14,7 +14,7 @@ def song_page(name, year):
 def spr_sidebar():
     menu = option_menu(
         menu_title=None,
-        options=['Home', 'Results', 'About', "How It Works"],
+        options=['Home', 'Results', 'About'],
         icons=['house', 'book', 'info-square', 'gear'],  # terminal
         menu_icon='cast',
         default_index=0,
@@ -26,8 +26,8 @@ def spr_sidebar():
         st.session_state.app_mode = 'Results'
     elif menu == 'About':
         st.session_state.app_mode = 'About'
-    elif menu == 'How It Works':
-        st.session_state.app_mode = 'How It Works'
+    # elif menu == 'How It Works':
+    #     st.session_state.app_mode = 'How It Works'
 
 
 def home_page():
@@ -36,13 +36,13 @@ def home_page():
     st.title("Spotify Music Recommender")
 
     # Song input section
-    st.subheader("")
+    #st.subheader("")
     col1, col2 = st.columns(2)
     song_input = col1.text_input("Enter a song:")
     year_input = col2.text_input("Enter the year:")
 
     # Button section
-    st.subheader("")
+    #st.subheader("")
     col3, col4 = st.columns(2)
     find_song_button = col3.button("Find Song")
     find_random_song_button = col4.button("Random Song")
@@ -56,13 +56,12 @@ def home_page():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    find_random_song()
-
-    # st.session_state.song_url = st.session_state.s_url
     # Url = st.text_input(label="Song Url",key='song_url',on_change=update_song_url)
     if find_song_button:
         song_page(song_input, year_input)
     elif find_random_song_button:
+        find_random_song()
+    elif song_input == "" and year_input == "":
         find_random_song()
 
     if predict_button:
@@ -115,17 +114,25 @@ def result_page():
             if i % 5 == 0:
                 time.sleep(1)
     except:
-        st.write("Please enter song informations and review then click start prediction")
+        st.subheader("Please enter song informations and review then click start prediction")
 
 
 def examples_page():
-    st.write("production")
+    st.subheader("Will added")
 
 
 def About_page():
     st.header('Development')
     """
-    [Github](https://github.com/alanahmet)
+    Have you ever listened to a song and liked it overall, but felt that certain features could be improved? Maybe the chorus was too loud, the energy level wasn't quite right, or there were either too many or too few words. I've had those experiences too, and that's what inspired me to create a song recommender based on user reviews.
+
+    The process is straightforward: simply type in the name of a song or choose a random one, and then enter your review. The recommender will analyze your review using ChatGPT and utilize the Spotify API to generate personalized song recommendations. It's an exciting way to enhance your music discovery and tailor the recommendations to your specific preferences.
+
+    Although it's important to note that the dataset used for training the model was relatively small (170k), the recommender still aims to provide valuable suggestions. While it may not reach its full potential due to the limited data, it serves as a starting point for exploring new songs that align with your individual tastes.
+
+    So, if you're looking to fine-tune your music experience and discover songs that better match your preferences, give this song recommender a try. Enter your review, and let the algorithm work its magic to recommend songs that you're more likely to enjoy.\n
+    Github : [alanahmet](https://github.com/alanahmet) \n
+    Mail : cs.ahmetyusufalan@gmail.com
     """
     st.subheader('Audio Features Explanation')
     """
@@ -161,8 +168,8 @@ def main():
         result_page()
     if st.session_state.app_mode == 'About':
         About_page()
-    if st.session_state.app_mode == 'How It Works':
-        examples_page()
+    # if st.session_state.app_mode == 'How It Works':
+    #     examples_page()
 
 
 # Run main()
