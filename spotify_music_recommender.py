@@ -6,8 +6,8 @@
 # In[22]:
 
 
-#import os
-#import difflib
+# import os
+# import difflib
 import numpy as np
 import pandas as pd
 import openai
@@ -28,26 +28,23 @@ from collections import defaultdict
 import warnings
 warnings.filterwarnings("ignore")
 
-
 # In[23]:
 
 
 def get_pipeline_data_number_cols():
     data = pd.read_csv("data/data.csv")
-    # genre_data = pd.read_csv('data/data_by_genres.csv')
-    # year_data = pd.read_csv('data/data_by_year.csv')
-    
-    song_cluster_pipeline = Pipeline([('scaler', StandardScaler()), 
-                                      ('kmeans', KMeans(n_clusters=20, 
+
+    song_cluster_pipeline = Pipeline([('scaler', StandardScaler()),
+                                      ('kmeans', KMeans(n_clusters=20,
                                        verbose=False))
-                                     ], verbose=False)
+                                      ], verbose=False)
 
     X = data.select_dtypes(np.number)
     number_cols = list(X.columns)
     song_cluster_pipeline.fit(X)
     song_cluster_labels = song_cluster_pipeline.predict(X)
     data['cluster_label'] = song_cluster_labels
-    
+
     return song_cluster_pipeline, data, number_cols
 
 
@@ -55,9 +52,10 @@ def get_pipeline_data_number_cols():
 
 
 def find_song(name, year):
-    sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="e941ee9577244e08a1741a6b8183b346", client_secret="d5990a6f11e442fe8e897da07b3f6277"))
+    sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+        client_id="e941ee9577244e08a1741a6b8183b346", client_secret="d5990a6f11e442fe8e897da07b3f6277"))
     song_data = defaultdict()
-    results = sp.search(q= 'track: {} year: {}'.format(name,year), limit=1)
+    results = sp.search(q='track: {} year: {}'.format(name, year), limit=1)
     if results['tracks']['items'] == []:
         return None
 
@@ -76,38 +74,43 @@ def find_song(name, year):
 
     return pd.DataFrame(song_data)
 
+
 def find_song_uri(name, year):
     # Create a Spotify client object.
-    client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id="e941ee9577244e08a1741a6b8183b346", client_secret="d5990a6f11e442fe8e897da07b3f6277"))
+    client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+        client_id="e941ee9577244e08a1741a6b8183b346", client_secret="d5990a6f11e442fe8e897da07b3f6277"))
     # Get the name of the song you want to get the ID for.
     song_name = name
     # Call the `search` method with the song name.
-    results = client.search(q= 'track: {} year: {}'.format(name,year), limit=1)
+    results = client.search(q='track: {} year: {}'.format(name, year), limit=1)
     # Get the first result.
     track = results['tracks']['items'][0]
     # The Spotify ID of the song will be in the `id` property.
     song_id = track['uri']
     return song_id
 
+
 def format_song(song_data, number_cols):
     list_song_data = song_data[number_cols].values.tolist()[0]
-    list_song_data = '[' + ', '.join([str(num) for num in list_song_data]) + ']'
+    list_song_data = '[' + ', '.join([str(num)
+                                     for num in list_song_data]) + ']'
     return list_song_data
 
+
 def get_response(text):
-  openai.api_key = "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"
+    openai.api_key = "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"
 
-  response = openai.Completion.create(
-    model="text-davinci-003",
-    prompt=text,
-    temperature=0.7,
-    max_tokens=128,
-    top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0
-  )
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=text,
+        temperature=0.7,
+        max_tokens=128,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
 
-  return response.choices[0].get("text")
+    return response.choices[0].get("text")
 
 
 # In[25]:
@@ -127,20 +130,19 @@ def get_text(user_critic, list_song_data):
     75%	0.747	1999	0.893	0.668	262400	0.703	0	0.102	8	0.261	-7.183	1	48	0.0756	135.537 \n \
     max	1	2020	0.996	0.988	5403500	1	1	1	11	1	3.855	1	100	0.97	243.507"
 
-
-
-    init_last = "\n\n start with only typing random  future_columns values in given range as a array"
-    #user_critic_ex = "\n \"user_critic=it was too old and loud but i like the energy\" "
+    # init_last = "\n\n start with only typing random  future_columns values in given range as a array"
+    # user_critic_ex = "\n \"user_critic=it was too old and loud but i like the energy\" "
     user_critic_last = "your output will be future_columns=[ <valence>, <published_year>, <acousticness>, <danceability>, <duration_ms>, <energy>, <explicit>,<instrumentalness>, <key>, <liveness>, <loudness>, <mode>, <popularity>, <speechiness>, <tempo>]  format"
     user_last = "\n\n start with the adjust following future_columns based on user_critic. "
-    #example_features = "future_columns=[0.68, 1976, 0.78, 0.62, 230948.3, 0.44, 0.22, 0.43, 5.2, 0.27, -9.67, 1, 31, 0.19, 118.86]"
-    #feature_col_starter = "future_columns="
+    # example_features = "future_columns=[0.68, 1976, 0.78, 0.62, 230948.3, 0.44, 0.22, 0.43, 5.2, 0.27, -9.67, 1, 31, 0.19, 118.86]"
+    # feature_col_starter = "future_columns="
     real_features = "future_columns=" + list_song_data
- 
-    #init_input = init_text + init_last
-    #test_input = init_text + user_last + user_critic + example_features + user_critic_last
-    real_input = init_text + user_last + user_critic + real_features + user_critic_last
-    
+
+    # init_input = init_text + init_last
+    # test_input = init_text + user_last + user_critic + example_features + user_critic_last
+    real_input = init_text + user_last + \
+        user_critic + real_features + user_critic_last
+
     return real_input
 
 
@@ -156,11 +158,10 @@ def format_gpt_output(rec_splitted):
 # In[27]:
 
 
-def recommend_gpt( song_list, spotify_data,song_cluster_pipeline, n_songs=15):
+def recommend_gpt(song_list, spotify_data, song_cluster_pipeline, n_songs=15):
     number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy', 'explicit',
- 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo']
+                   'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo']
 
-    
     metadata_cols = ['name', 'year', 'artists']
     song_center = np.array(song_list)
 
@@ -170,9 +171,9 @@ def recommend_gpt( song_list, spotify_data,song_cluster_pipeline, n_songs=15):
 
     distances = cdist(scaled_song_center, scaled_data, 'cosine')
     index = list(np.argsort(distances)[:, :n_songs][0])
-    
+
     rec_songs = spotify_data.iloc[index]
-    #rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
+    # rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
     return rec_songs[metadata_cols].to_dict(orient='records')
 
 
@@ -182,7 +183,7 @@ def recommend_gpt( song_list, spotify_data,song_cluster_pipeline, n_songs=15):
 def get_rec_song_uri(res):
     song_spotipy_info = []
     for song in res:
-        song_spotipy_info.append(find_song_uri(song["name"], song["year"]))  
+        song_spotipy_info.append(find_song_uri(song["name"], song["year"]))
     return song_spotipy_info
 
 
@@ -206,39 +207,35 @@ def get_random_song():
     sample = data.sample(n=1)
     return sample.name, sample.year
 
-def get_model_values():
-    data_path = "data/data.csv"
-    file_path = "pipeline.pkl"
-    cluster_path = "cluster_labels.csv"
+
+def get_model_values(data_path, file_path, cluster_path):
+    data_path = data_path
+    file_path = file_path
+    cluster_path = cluster_path
     # Load the pipeline from the pickle file
     with open(file_path, 'rb') as file:
         loaded_pipeline = pickle.load(file)
     data = pd.read_csv(data_path)
     labels = pd.read_csv(cluster_path)
     data["cluster_label"] = labels["cluster_label"]
-    number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy', 'explicit', 'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo']
+    number_cols = ['valence', 'year', 'acousticness', 'danceability', 'duration_ms', 'energy', 'explicit',
+                   'instrumentalness', 'key', 'liveness', 'loudness', 'mode', 'popularity', 'speechiness', 'tempo']
     return loaded_pipeline, data, number_cols
 
-def control():
-    #song_cluster_pipeline, data, number_cols = get_pipeline_data_number_cols()
 
-    song_cluster_pipeline, data, number_cols = get_model_values()
-    
+def control():
+    # song_cluster_pipeline, data, number_cols = get_pipeline_data_number_cols()
+    data_path = "data/data.csv"
+    file_path = "data/pipeline.pkl"
+    cluster_labels = "data/cluster_labels.csv"
+    song_cluster_pipeline, data, number_cols = get_model_values(data_path, file_path, cluster_labels)
+
     user_critic_text = "it was dull and very loud"
     song_name = "Poem of a Killer"
     song_year = 2022
-    rec_splitted = get_recommendation_array(song_name, song_year, number_cols, user_critic_text)
+    rec_splitted = get_recommendation_array(
+        song_name, song_year, number_cols, user_critic_text)
 
     res = recommend_gpt(rec_splitted, data, song_cluster_pipeline)
     print(res)
     print(get_rec_song_uri(res))
-
-
-
-# In[35]:
-
-# In[ ]:
-
-
-
-

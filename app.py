@@ -3,6 +3,9 @@ from streamlit_option_menu import option_menu
 import streamlit.components.v1 as components
 import spotify_music_recommender as smr
 
+if "song_init" not in st.session_state:
+    st.session_state.song_init = False
+
 
 def song_page(name, year):
     song_uri = smr.find_song_uri(name, year)
@@ -15,7 +18,7 @@ def spr_sidebar():
     menu = option_menu(
         menu_title=None,
         options=['Home', 'Results', 'About'],
-        icons=['house', 'book', 'info-square', 'gear'],  # terminal
+        icons=['house', 'book', 'info-square'],
         menu_icon='cast',
         default_index=0,
         orientation='horizontal'
@@ -36,13 +39,13 @@ def home_page():
     st.title("Spotify Music Recommender")
 
     # Song input section
-    #st.subheader("")
+    # st.subheader("")
     col1, col2 = st.columns(2)
     song_input = col1.text_input("Enter a song:")
     year_input = col2.text_input("Enter the year:")
 
     # Button section
-    #st.subheader("")
+    # st.subheader("")
     col3, col4 = st.columns(2)
     find_song_button = col3.button("Find Song")
     find_random_song_button = col4.button("Random Song")
@@ -54,25 +57,27 @@ def home_page():
     # Prediction button
     predict_button = st.button("Start Prediction")
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # Url = st.text_input(label="Song Url",key='song_url',on_change=update_song_url)
     if find_song_button:
         song_page(song_input, year_input)
     elif find_random_song_button:
         find_random_song()
-    elif song_input == "" and year_input == "":
+    elif song_input == "" and year_input == "" and not st.session_state.song_init:
+        st.session_state.song_init = True
         find_random_song()
 
     if predict_button:
         with st.spinner('Getting Recommendations...'):
             try:
-                song_cluster_pipeline, data, number_cols = smr.get_model_values()
+                data_path = "data/data.csv"
+                file_path = "data/pipeline.pkl"
+                cluster_labels = "data/cluster_labels.csv"
+                song_cluster_pipeline, data, number_cols = smr.get_model_values(
+                    data_path, file_path, cluster_labels)
                 user_critic_text = critic_input
                 rec_splitted = smr.get_recommendation_array(
                     song_input, year_input, number_cols, user_critic_text)
                 res = smr.recommend_gpt(
-                    rec_splitted, data, song_cluster_pipeline)
+                    rec_splitted, data, song_cluster_pipeline, 15)
                 st.session_state.song_uris = smr.get_rec_song_uri(res)
                 st.write("You can access recommended song at result page")
             except:
@@ -103,18 +108,15 @@ def find_random_song():
 
 
 def result_page():
-    try:
-        i = 0
+    if "song_uris" in st.session_state:
         for uri in st.session_state.song_uris:
             uri = uri.split(":")[-1]
             uri_link = "https://open.spotify.com/embed/track/" + \
                 uri + "?utm_source=generator&theme=0"
             components.iframe(uri_link, height=80)
-            i += 1
-            if i % 5 == 0:
-                time.sleep(1)
-    except:
-        st.subheader("Please enter song informations and review then click start prediction")
+    else:
+        st.subheader(
+            "Please enter song informations and review then click start prediction")
 
 
 def examples_page():
