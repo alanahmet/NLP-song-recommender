@@ -9,6 +9,14 @@ if "song_init" not in st.session_state:
 
 
 def song_page(name, year):
+    """
+    Displays the Spotify song with the given name and year using an iframe.
+
+    Args:
+        name (str): The name of the song.
+        year (str): The year of the song.
+    """
+    
     song_uri = smr.find_song_uri(name, year)
     formatted_song_uri = song_uri.split(':')[-1]
     uri_link = f'https://open.spotify.com/embed/track/{formatted_song_uri}?utm_source=generator'
@@ -30,39 +38,29 @@ def spr_sidebar():
         st.session_state.app_mode = 'Results'
     elif menu == 'About':
         st.session_state.app_mode = 'About'
-    # elif menu == 'How It Works':
-    #     st.session_state.app_mode = 'How It Works'
-
 
 def home_page():
 
-    # App layout
     st.title("Spotify Music Recommender")
 
-    # Song input section
-    # st.subheader("")
     col1, col2 = st.columns(2)
     song_input = col1.text_input("Enter a song:")
     year_input = col2.text_input("Enter the year:")
 
-    # Button section
-    # st.subheader("")
     col3, col4 = st.columns(2)
     find_song_button = col3.button("Find Song")
     find_random_song_button = col4.button("Random Song")
 
-    # Critic input section
     st.subheader("Song Review")
     critic_input = st.text_input("")
 
-    # Prediction button
     predict_button = st.button("Start Prediction")
 
     if find_song_button:
         song_page(song_input, year_input)
     elif find_random_song_button:
         find_random_song()
-    elif song_input == "" and year_input == "" and not st.session_state.song_init:
+    elif not st.session_state.song_init:
         st.session_state.song_init = True
         find_random_song()
 
@@ -75,28 +73,28 @@ def home_page():
                 song_cluster_pipeline, data, number_cols = smr.get_model_values(
                     data_path, file_path, cluster_labels)
                 user_critic_text = critic_input
-                rec_splitted = smr.get_recommendation_array(
+                raw_recommendation_array = smr.get_recommendation_array(
                     song_input, year_input, number_cols, user_critic_text)
-                res = smr.recommend_gpt(
-                    rec_splitted, data, song_cluster_pipeline, 15)
-                st.session_state.song_uris = smr.get_rec_song_uri(res)
+                result = smr.format_chatgpt_recommendations (
+                    raw_recommendation_array, data, song_cluster_pipeline, 15)
+                st.session_state.song_uris = smr.get_recommendation_song_uri(result)
                 st.write("You can access recommended song at result page")
             except:
                 st.write("An error occured please try again")
 
 
-# def text_field(label, columns=None, **input_params):
-#     c1, c2 = st.columns(columns or [1, 4])
+def text_field(label, columns=None, **input_params):
+    c1, c2 = st.columns(columns or [1, 4])
 
-#     # Display field name with some alignment
-#     c1.markdown("##")
-#     c1.markdown(label)
+    # Display field name with some alignment
+    c1.markdown("##")
+    c1.markdown(label)
 
-#     # Sets a default key parameter to avoid duplicate key errors
-#     input_params.setdefault("key", label)
+    # Sets a default key parameter to avoid duplicate key errors
+    input_params.setdefault("key", label)
 
-#     # Forward text input parameters
-#     return c2.text_input("", **input_params)
+    # Forward text input parameters
+    return c2.text_input("", **input_params)
 
 
 def find_random_song():
@@ -171,10 +169,6 @@ def main():
         result_page()
     if st.session_state.app_mode == 'About':
         About_page()
-    # if st.session_state.app_mode == 'How It Works':
-    #     examples_page()
 
-
-# Run main()
 if __name__ == '__main__':
     main()
