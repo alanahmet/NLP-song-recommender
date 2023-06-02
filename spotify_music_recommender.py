@@ -53,10 +53,10 @@ def get_pipeline_data_number_cols():
 
 
 def find_song(name, year):
-    if os.path.isfile("/secrets"):
-        import secrets
+    if os.path.isfile(".\secret_keys.py"):
+        import secret_keys
         sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-            client_id=secrets.client_id, client_secret=secrets.client_secret))
+            client_id=secret_keys.client_id, client_secret=secret_keys.client_secret))
     else:
         sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
             client_id=os.environ.get("client_id"), client_secret=os.environ.get("client_secret")))
@@ -84,10 +84,10 @@ def find_song(name, year):
 
 def find_song_uri(name, year):
     # Create a Spotify client object.
-    if os.path.isfile("/secrets"):
-        import secrets
+    if os.path.isfile(".\secret_keys.py"):
+        import secret_keys
         client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-            client_id=secrets.client_id, client_secret=secrets.client_secret))
+            client_id=secret_keys.client_id, client_secret=secret_keys.client_secret))
     else:
         client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
             client_id=os.environ.get("client_id"), client_secret=os.environ.get("client_secret")))
@@ -111,9 +111,9 @@ def format_song(song_data, number_cols):
 
 def get_response(text):
 
-    if os.path.isfile("/secrets"):
-        import secrets
-        openai.api_key = secrets.openai_api_key
+    if os.path.isfile(".\secret_keys.py"):
+        import secret_keys
+        openai.api_key = secret_keys.openai_api_key
     else:
         openai.api_key = os.environ.get("openai_api_key")
 

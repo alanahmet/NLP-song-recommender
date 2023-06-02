@@ -7,7 +7,7 @@ __pycache__/
 *$py.class
 
 #custom
-secrets.py
+secret_keys.py
 .cache
 
 # Distribution / packaging
