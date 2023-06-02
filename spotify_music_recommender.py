@@ -13,6 +13,7 @@ import pandas as pd
 import openai
 import spotipy
 import pickle
+import os
 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -52,8 +53,14 @@ def get_pipeline_data_number_cols():
 
 
 def find_song(name, year):
-    sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-        client_id="e941ee9577244e08a1741a6b8183b346", client_secret="d5990a6f11e442fe8e897da07b3f6277"))
+    if os.path.isfile("/secrets"):
+        import secrets
+        sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+            client_id=secrets.client_id, client_secret=secrets.client_secret))
+    else:
+        sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+            client_id=os.environ.get("client_id"), client_secret=os.environ.get("client_secret")))
+
     song_data = defaultdict()
     results = sp.search(q='track: {} year: {}'.format(name, year), limit=1)
     if results['tracks']['items'] == []:
@@ -77,8 +84,13 @@ def find_song(name, year):
 
 def find_song_uri(name, year):
     # Create a Spotify client object.
-    client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-        client_id="e941ee9577244e08a1741a6b8183b346", client_secret="d5990a6f11e442fe8e897da07b3f6277"))
+    if os.path.isfile("/secrets"):
+        import secrets
+        client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+            client_id=secrets.client_id, client_secret=secrets.client_secret))
+    else:
+        client = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+            client_id=os.environ.get("client_id"), client_secret=os.environ.get("client_secret")))
     # Get the name of the song you want to get the ID for.
     song_name = name
     # Call the `search` method with the song name.
@@ -98,7 +110,12 @@ def format_song(song_data, number_cols):
 
 
 def get_response(text):
-    openai.api_key = "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"
+
+    if os.path.isfile("/secrets"):
+        import secrets
+        openai.api_key = secrets.openai_api_key
+    else:
+        openai.api_key = os.environ.get("openai_api_key")
 
     response = openai.Completion.create(
         model="text-davinci-003",
@@ -228,7 +245,8 @@ def control():
     data_path = "data/data.csv"
     file_path = "data/pipeline.pkl"
     cluster_labels = "data/cluster_labels.csv"
-    song_cluster_pipeline, data, number_cols = get_model_values(data_path, file_path, cluster_labels)
+    song_cluster_pipeline, data, number_cols = get_model_values(
+        data_path, file_path, cluster_labels)
 
     user_critic_text = "it was dull and very loud"
     song_name = "Poem of a Killer"

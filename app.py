@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 import streamlit.components.v1 as components
 import spotify_music_recommender as smr
 
+
 if "song_init" not in st.session_state:
     st.session_state.song_init = False
 
