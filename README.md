@@ -2,7 +2,7 @@
 
 Please visit the following link to access the demo version [Song Recommender with NLP](https://huggingface.co/spaces/alan-23/nlp_based_song_recommender)
 
-![Showcase](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+![Showcase](https://github.com/alanahmet/song_recommender_with_chatgpt/blob/main/example_3.gif?raw=true)
 
 Have you ever listened to a song and liked it overall, but felt that certain features could be improved? Maybe the chorus was too loud, the energy level wasn't quite right, or there were either too many or too few words. I've had those experiences too, and that's what inspired me to create a song recommender based on user reviews.
 
