@@ -2,10 +2,13 @@
 # Python - https://github.com/github/gitignore/blob/master/Python.gitignore
 ########################################################################
 # Byte-compiled / optimized / DLL files
-secrets.py
 __pycache__/
 *.py[cod]
 *$py.class
+
+#custom
+secrets.py
+.cache
 
 # Distribution / packaging
 build/
